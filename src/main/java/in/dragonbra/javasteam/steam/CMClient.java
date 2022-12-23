@@ -69,6 +69,18 @@ public abstract class CMClient {
 
     private Map<EServerType, Set<InetSocketAddress>> serverMap;
 
+    private String proxyHost;
+    private Integer proxyPort;
+
+
+    public CMClient(String proxyHost,Integer proxyIp,SteamConfiguration configuration){
+        this(configuration);
+        this.proxyHost = proxyHost;
+        this.proxyPort = proxyIp;
+    }
+
+
+
     private final EventHandler<NetMsgEventArgs> netMsgReceived = new EventHandler<NetMsgEventArgs>() {
         @Override
         public void handleEvent(Object sender, NetMsgEventArgs e) {
@@ -299,12 +311,16 @@ public abstract class CMClient {
         if (protocol.contains(ProtocolTypes.WEB_SOCKET)) {
             return new WebSocketConnection();
         } else if (protocol.contains(ProtocolTypes.TCP)) {
-            return new EnvelopeEncryptedConnection(new TcpConnection(), getUniverse());
+            if(null==proxyHost||null== proxyPort){
+                return new EnvelopeEncryptedConnection(new TcpConnection(), this.getUniverse());
+            }else {
+                return new EnvelopeEncryptedConnection(new TcpConnection(proxyHost, proxyPort), this.getUniverse());
+            }
         } else if (protocol.contains(ProtocolTypes.UDP)) {
-            return new EnvelopeEncryptedConnection(new UdpConnection(), getUniverse());
+            return new EnvelopeEncryptedConnection(new UdpConnection(), this.getUniverse());
+        } else {
+            throw new IllegalArgumentException("Protocol bitmask has no supported protocols set.");
         }
-
-        throw new IllegalArgumentException("Protocol bitmask has no supported protocols set.");
     }
 
     public static IPacketMsg getPacketMsg(byte[] data) {

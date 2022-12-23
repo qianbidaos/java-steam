@@ -59,7 +59,7 @@ public abstract class Connection {
      * @param endPoint The end point to connect to.
      */
     public final void connect(InetSocketAddress endPoint) {
-        connect(endPoint, 5000);
+        connect(endPoint, 3000);
     }
 
     /**

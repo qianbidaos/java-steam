@@ -6,6 +6,7 @@ import in.dragonbra.javasteam.steam.steamclient.configuration.SteamConfiguration
 import in.dragonbra.javasteam.types.KeyValue;
 import in.dragonbra.javasteam.util.NetHelpers;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +53,6 @@ public class SteamDirectory {
         }
 
         KeyValue response = api.call("GetCMList", params);
-
         EResult result = EResult.from(response.get("result").asInteger(EResult.Invalid.code()));
 
         if (result != EResult.OK) {

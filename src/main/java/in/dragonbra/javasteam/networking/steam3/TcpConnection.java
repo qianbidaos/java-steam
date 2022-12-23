@@ -8,6 +8,7 @@ import in.dragonbra.javasteam.util.stream.BinaryWriter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.Socket;
 
 /**
@@ -34,6 +35,18 @@ public class TcpConnection extends Connection {
 
     private final Object netLock = new Object();
 
+    private InetSocketAddress proxyEndPoint;;
+
+    public TcpConnection(String proxyIp, Integer port) {
+        super();
+        proxyEndPoint = new InetSocketAddress(proxyIp, port);
+    }
+
+    public TcpConnection() {
+        super();
+    }
+
+
     private void shutdown() {
         try {
             if (socket.isConnected()) {
@@ -45,7 +58,7 @@ public class TcpConnection extends Connection {
         }
     }
 
-    private void connectionCompleted(boolean success) {
+    protected void connectionCompleted(boolean success) {
         if (!success) {
             logger.debug("Timed out while connecting to " + currentEndPoint);
             release(false);
@@ -106,18 +119,23 @@ public class TcpConnection extends Connection {
 
     @Override
     public void connect(InetSocketAddress endPoint, int timeout) {
-        synchronized (netLock) {
-            currentEndPoint = endPoint;
-            try {
-                logger.debug("Connecting to " + currentEndPoint + "...");
-                socket = new Socket();
-                socket.connect(endPoint, timeout);
+        synchronized(this.netLock) {
+            this.currentEndPoint = endPoint;
 
-                connectionCompleted(true);
-            } catch (IOException e) {
-                logger.debug("Socket exception while completing connection request to " + currentEndPoint, e);
-                connectionCompleted(false);
+            try {
+                logger.debug("Connecting to " + this.currentEndPoint + "...");
+                if (null != proxyEndPoint) {
+                    this.socket = new Socket(new Proxy(Proxy.Type.SOCKS,proxyEndPoint));
+                }else {
+                    this.socket = new Socket();
+                }
+                this.socket.connect(endPoint, timeout);
+                this.connectionCompleted(true);
+            } catch (IOException var6) {
+                logger.debug("Socket exception while completing connection request to " + this.currentEndPoint, var6);
+                this.connectionCompleted(false);
             }
+
         }
     }
 

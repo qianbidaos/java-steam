@@ -60,7 +60,7 @@ public class FileServerListProvider implements IServerListProvider {
         } catch (FileNotFoundException e) {
             logger.debug("servers list file not found");
         } catch (IOException e) {
-            logger.debug("Failed to read server list file " + file.getAbsolutePath());
+            System.err.println("Failed to read server list file " + file.getAbsolutePath());
         }
         return null;
     }

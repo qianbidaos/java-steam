@@ -3,11 +3,13 @@ package in.dragonbra.javasteam.steam.steamclient.configuration;
 import in.dragonbra.javasteam.enums.EClientPersonaStateFlag;
 import in.dragonbra.javasteam.enums.EUniverse;
 import in.dragonbra.javasteam.networking.steam3.ProtocolTypes;
+import in.dragonbra.javasteam.steam.discovery.FileServerListProvider;
 import in.dragonbra.javasteam.steam.discovery.IServerListProvider;
 import in.dragonbra.javasteam.steam.discovery.MemoryServerListProvider;
 import in.dragonbra.javasteam.steam.webapi.WebAPI;
 import okhttp3.OkHttpClient;
 
+import java.io.File;
 import java.util.EnumSet;
 
 /**
@@ -24,13 +26,19 @@ public class SteamConfigurationBuilder implements ISteamConfigurationBuilder {
 
     public static SteamConfigurationState createDefaultState() {
         SteamConfigurationState state = new SteamConfigurationState();
-
         state.setAllowDirectoryFetch(true);
-        state.setConnectionTimeout(5000L);
+        state.setConnectionTimeout(50000L);
         state.setDefaultPersonaStateFlags(EnumSet.of(EClientPersonaStateFlag.PlayerName, EClientPersonaStateFlag.Presence,
                 EClientPersonaStateFlag.SourceID, EClientPersonaStateFlag.GameExtraInfo, EClientPersonaStateFlag.LastSeen));
         state.setProtocolTypes(ProtocolTypes.TCP);
-        state.setServerListProvider(new MemoryServerListProvider());
+        IServerListProvider serverListProvider;
+        File cmList = new File(System.getProperty("user.dir") + File.separator + "cmList");
+        if(cmList.exists()){
+            serverListProvider = new FileServerListProvider(cmList);
+        }else {
+            serverListProvider = new MemoryServerListProvider();
+        }
+        state.setServerListProvider(serverListProvider);
         state.setUniverse(EUniverse.Public);
         state.setWebAPIBaseAddress(WebAPI.DEFAULT_BASE_ADDRESS);
         state.setHttpClient(new OkHttpClient());

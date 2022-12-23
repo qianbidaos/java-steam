@@ -59,6 +59,43 @@ public class SteamClient extends CMClient {
         this(SteamConfiguration.createDefault());
     }
 
+    public SteamClient(String proxyHost,Integer proxyIp){
+        super(proxyHost,proxyIp,SteamConfiguration.createDefault());
+        addHandler(new SteamFriends());
+        addHandler(new SteamUser());
+        addHandler(new SteamNotifications());
+        addHandler(new SteamTrading());
+        addHandler(new SteamApps());
+        addHandler(new SteamCloud());
+        addHandler(new SteamScreenshots());
+        addHandler(new SteamUserStats());
+        addHandler(new SteamWorkshop());
+        addHandler(new SteamMasterServer());
+        addHandler(new SteamGameServer());
+        addHandler(new SteamGameCoordinator());
+
+        processStartTime = new Date();
+
+        dispatchMap.put(EMsg.ClientCMList, new Consumer<IPacketMsg>() {
+            @Override
+            public void accept(IPacketMsg packetMsg) {
+                handleCMList(packetMsg);
+            }
+        });
+        dispatchMap.put(EMsg.JobHeartbeat, new Consumer<IPacketMsg>() {
+            @Override
+            public void accept(IPacketMsg packetMsg) {
+                handleJobHeartbeat(packetMsg);
+            }
+        });
+        dispatchMap.put(EMsg.DestJobFailed, new Consumer<IPacketMsg>() {
+            @Override
+            public void accept(IPacketMsg packetMsg) {
+                handleJobFailed(packetMsg);
+            }
+        });
+    }
+
     /**
      * Initializes a new instance of the {@link SteamClient} class with a specific configuration.
      *
